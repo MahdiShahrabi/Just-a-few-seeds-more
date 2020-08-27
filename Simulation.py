@@ -3,14 +3,16 @@ import networkx as nx
 import pandas as pd
 from random import uniform
 import random
+import pickle
 import matplotlib.pyplot as plt 
 import os
 
 from SIRModel import Simulate_SIR
 from ThresholdModel import Simulate_Thr
+from Threshold_dist import Threshold_dist
 
 
-def simulation(Graph=nx.erdos_renyi_graph(200,0.01),method='SIR',c=0.5,dist_type=1,
+def simulation(network={'type':'Erdos','size':1000,'d':2},method='SIR',c=0.5,dist_type=1,
                plot=['Random','Eigen','Degree'],numSeed=20,Repeat=50,plot_show=True):
     """ A function to run different simulation and plot the results 
         
@@ -43,6 +45,24 @@ def simulation(Graph=nx.erdos_renyi_graph(200,0.01),method='SIR',c=0.5,dist_type
         The method to generate seeds and run the simulations.
         It must be a subset of the ['Degree','Random','Eigen']
     """
+    # GraphType
+    if network['type'] is 'Erdos':
+        n = network['size']
+        d = network['d']
+        Graph = nx.erdos_renyi_graph(n,d/n)       
+        
+    elif network['type'] is 'Facebook':
+        os.chdir(r'C:\Users\Mahdi\OneDrive\Just A Few Seeds More\Just-a-few-seeds-more')
+        with open('FaceBookGraph', 'rb') as f:
+             Graph = pickle.load(f)
+                
+    elif network['type'] is 'IndianVillage':
+        os.chdir(r'C:\Users\Mahdi\OneDrive\Just A Few Seeds More\Just-a-few-seeds-more')
+        with open('IndianVillage', 'rb') as f:
+             Graph = pickle.load(f)
+    
+    
+    
     # Function dictionary for diffrent models
     switch_method = {'SIR':Simulate_SIR,'Threshold':Simulate_Thr}
     
@@ -50,7 +70,10 @@ def simulation(Graph=nx.erdos_renyi_graph(200,0.01),method='SIR',c=0.5,dist_type
     lng = Graph.number_of_nodes()
     
     # Average Degree
-    d_bar = np.round(np.mean(list(dict(Graph.degree()).values())),1)
+    if network['type'] is 'Erdos':
+        d_bar = network['d']
+    else:
+        d_bar = np.round(np.mean(list(dict(Graph.degree()).values())),1)
     
     # Checking the validity of inputs
     if numSeed>lng:
@@ -75,63 +98,18 @@ def simulation(Graph=nx.erdos_renyi_graph(200,0.01),method='SIR',c=0.5,dist_type
         raise ValueError('"method" must be "SIR" or "Threshold"')
     
     
+    # Creating Thresholds based on the dist_type
+    Thresholds = Threshold_dist(lng,dist_type)
+    
     # Choosing the function based on the method
     func = switch_method[method]
     
     
-    # Creating Thresholds based on the dist_type
-    if dist_type==1:
-        Thresholds = np.random.uniform(0,1,lng)        
-        
-    elif dist_type==2:
-        l = np.random.normal(0.5,0.2,lng)
-        Thresholds = [x if x>=0 and x<=1 else uniform(0.45,0.55) for x in l]
-        
-    elif dist_type==3:
-        Thresholds = []
-        dist = [(0,0.2),(0.2,0.8),(0.8,1)]
-        weight = [45,10,45]
-        weight_size = [np.round(x*lng/100) for x in weight]
-        weight_size[-1] = weight_size[-1]+lng-sum(weight_size)
-        for i in range(3):
-            Thresholds = Thresholds + list(np.random.uniform(dist[i][0],dist[i][1],int(weight_size[i])))
-        random.shuffle(Thresholds)
-    
-    elif dist_type==4:
-        Thresholds = []
-        dist = [(0,0.2),(0.2,0.8),(0.8,1)]
-        weight = [20,10,70]
-        weight_size = [np.round(x*lng/100) for x in weight]
-        weight_size[-1] = weight_size[-1]+lng-sum(weight_size)
-        for i in range(3):
-            Thresholds = Thresholds + list(np.random.uniform(dist[i][0],dist[i][1],int(weight_size[i])))
-        random.shuffle(Thresholds)
-        
-    elif dist_type==5:
-        Thresholds = []
-        dist = [(0,0.2),(0.2,0.8),(0.8,1)]
-        weight = [70,10,20]
-        weight_size = [np.round(x*lng/100) for x in weight]
-        weight_size[-1] = weight_size[-1]+lng-sum(weight_size)
-        for i in range(3):
-            Thresholds = Thresholds + list(np.random.uniform(dist[i][0],dist[i][1],int(weight_size[i])))
-        random.shuffle(Thresholds)
-        
-    elif dist_type==6:
-        Thresholds = []
-        dist = [(0,0.2),(0.2,0.8),(0.8,1)]
-        weight = [10,80,10]
-        weight_size = [np.round(x*lng/100) for x in weight]
-        weight_size[-1] = weight_size[-1]+lng-sum(weight_size)
-        for i in range(3):
-            Thresholds = Thresholds + list(np.random.uniform(dist[i][0],dist[i][1],int(weight_size[i])))
-        random.shuffle(Thresholds)
-    
     # "Simulation Sarted" message!
     if method=='SIR':
-        print('Simulation on the Model "SIR" with c={} has started:'.format(c))
+        print('Simulation on the Model "SIR" with c={} has started (Graph Type={}):'.format(c,network['type']))
     else: 
-        print('Simulation on the Model "Threshold" with dist_type={} has started:'.format(dist_type))
+        print('Simulation on the Model "Threshold" with dist_type={} has started (Graph Type={}):'.format(dist_type,network['type']))
     
     # declaring outputlist
     out = []
@@ -161,12 +139,11 @@ def simulation(Graph=nx.erdos_renyi_graph(200,0.01),method='SIR',c=0.5,dist_type
         ax1.grid(alpha=.4,axis='y')
         plt.suptitle('      Cascade Size vs Number of Seeds '.format(lng,method),fontsize=15,y=0.98)
         if method == 'SIR':
-            plt.title('Graph size: {},   Average degree: {:0.2f},   Model: {},   c: {}'.format(lng,d_bar,method,c),fontsize=10)
+            plt.title('Graph Type: {}, Graph size={},   Average degree={:0.2f},   Model: {},   c={}'.format(network['type'],lng,d_bar,method,c),fontsize=10)
             plot_name = 'SIR_c'+str(c)+'_d'+str(d_bar)+'.png'
         else:
-            plt.title('Graph size:{},   Average degree: {:0.2f},   Model:{},   Threshold distribution: dist_type{}'.format(
-                lng,d_bar,method,dist_type),fontsize=10)
-            plot_name = 'Threshold_distType'+str(dist_type)+'_d'+str(d_bar)+'.png'
+            plt.title('Graph Type: {}, Graph Size={},   Average Degree= {:0.2f},   Model:{},   Threshold Distribution: dist_type{}'.format(network['type'],lng,d_bar,method,dist_type),fontsize=10)
+            plot_name = network['type']+'_Threshold_distType'+str(dist_type)+'_d'+str(d_bar)+'.png'
         plt.legend(fontsize=10)
         plt.tight_layout()
         plt.subplots_adjust(top=.9)
