@@ -57,7 +57,7 @@ def simulation(network={'type':'Erdos','size':1000,'d':2},method='SIR',c=0.5,dis
              Graph = pickle.load(f)
                 
     elif network['type'] is 'IndianVillage':
-        os.chdir(r'C:\Users\Mahdi\OneDrive\Just A Few Seeds More\Just-a-few-seeds-more')
+        os.chdir(r'/Users/mahdishahrabi/Documents/Codes/Just-a-few-seeds-more/IndianVillage')
         with open('IndianVillage', 'rb') as f:
              Graph = pickle.load(f)
     
@@ -122,6 +122,7 @@ def simulation(network={'type':'Erdos','size':1000,'d':2},method='SIR',c=0.5,dis
             out.append(func(Graph=Graph,Thr=Thresholds, numSeed=numSeed, Repeat=Repeat, how=X))
         print(X,' is done!')
     
+    
     if plot_show:
         ### Ploting the results 
         fig, ax1 = plt.subplots(1,1,figsize=(10,6), dpi= 180)
@@ -147,7 +148,7 @@ def simulation(network={'type':'Erdos','size':1000,'d':2},method='SIR',c=0.5,dis
         plt.legend(fontsize=10)
         plt.tight_layout()
         plt.subplots_adjust(top=.9)
-        os.chdir(r"C:\Users\Mahdi\OneDrive\Just A Few Seeds More\Photos")
+        os.chdir(r"/Users/mahdishahrabi/Documents/Codes/Just-a-few-seeds-more/Photos")
         plt.savefig(plot_name)
         plt.show()
     
