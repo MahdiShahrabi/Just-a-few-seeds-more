@@ -1,0 +1,76 @@
+Wrote profile results to /Users/mahdishahrabi/.spyder-py3/lineprofiler.results
+Timer unit: 1e-06 s
+
+Total time: 20.5863 s
+File: /Users/mahdishahrabi/Github Codes/Just-a-few-seeds-more/Simulation_new.py
+Function: SIR at line 19
+
+Line #      Hits         Time  Per Hit   % Time  Line Contents
+==============================================================
+    19                                           @profile
+    20                                           def SIR (Graph,Neighbors_List,c=0.3, Seeds = [1],Neighbors_List_provided = False):
+    21                                               """ A function to run "SIR" model simulation on a Graph 
+    22                                                   
+    23                                               ...
+    24                                               Parameters
+    25                                               ----------
+    26                                               Graph: networkx.Graph,
+    27                                                   A graph to run the simulation on
+    28                                                   
+    29                                               c: float, default values is 0.3
+    30                                                   The probabilty of passing information to another node.
+    31                                                   
+    32                                              Seeds: list, default value is [1]
+    33                                                   Initial infected nodes
+    34                                                   
+    35                                              Neighbors_List: list of sets,
+    36                                                  List of neighbors for each node
+    37                                                  
+    38                                             Neighbors_List_provided: boolean, default value = False
+    39                                               if list is not provided we calculate list ourselves
+    40                                               """
+    41                                               
+    42                                               # Size of Graph
+    43    110000     128273.0      1.2      0.6      lng = Graph.number_of_nodes()
+    44                                                   
+    45                                               # Creating Neighbor List if it is not provided
+    46    110000      77523.0      0.7      0.4      if not Neighbors_List_provided:
+    47                                                   Neighbors_List = []
+    48                                                   Nodes = list(Graph.nodes())
+    49                                                   Nodes.sort(reverse=False)
+    50                                                   # Finding Neighbors of each node
+    51                                                   for node in list(Nodes):
+    52                                                       Neighbors_List.append(set(dict(Graph.adj[node])))
+    53                                              
+    54                                                   
+    55                                           
+    56                                               # Initializing the Status Lists of Normal and Informed Nodes
+    57    110000    1022163.0      9.3      5.0      Normal = list(range(lng))
+    58    110000      74860.0      0.7      0.4      Informed = list()
+    59                                           
+    60                                               # Adding initial seeds to Informed list
+    61    110000     296903.0      2.7      1.4      Informed = [x for x in Seeds]
+    62                                           
+    63                                               # Removing Informeds from Normal list
+    64                                               # Normal = [x for x in Normal if x not in Informed]
+    65    110000    2768674.0     25.2     13.4      Normal = list(set(Normal) - set(Informed))
+    66                                           
+    67                                               ## SIR Process
+    68                                               # For each Informed node we try to find the transmissions
+    69   1594953     994102.0      0.6      4.8      for node in Informed:
+    70                                                   
+    71                                                   ## Finding the Neighbors of the node based which are not informed already
+    72   1484953    2105443.0      1.4     10.2          Neighbors = Neighbors_List[node] - set(Informed)
+    73                                                   # for each uninformed neighbor
+    74   4597144    2941998.0      0.6     14.3          for advicee in Neighbors:   
+    75                                                       
+    76                                                       # it Gets information with probability 'c'
+    77   3112191    3427752.0      1.1     16.7              if  uniform(0,1)<c:
+    78    934953    6002388.0      6.4     29.2                  Normal.remove(advicee)
+    79    934953     674884.0      0.7      3.3                  Informed.append(advicee)
+    80                                           
+    81                                                   
+    82                                               
+    83                                               # Returning a dataframe of Seedsize and average cascade size
+    84    110000      71376.0      0.6      0.3      return len(Informed)
+

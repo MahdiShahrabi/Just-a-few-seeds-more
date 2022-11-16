@@ -103,3 +103,4 @@ def Simulate_SIR (Graph,c=0.3, numSeed = 20, Repeat=50 , how='Degree'):
     
     # Returning a dataframe of Seedsize and average cascade size
     return(pd.DataFrame(data={'SeedSize':list(np.arange(1,numSeed+1,1)),'Cascade':Cascade_size}))
+
