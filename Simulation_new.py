@@ -84,8 +84,8 @@ def SIR (Graph,Neighbors_List,c=0.3, Seeds = [1],Neighbors_List_provided = False
 
 
 
-
-def Simulate_SIR(c=0.3,number_of_seeds=5):
+# Runing simulation for an specific c and number of Seeds
+def Simulate_SIR(c=0.3,number_of_seeds=5) -> pd.DataFrame:
     # Simulation config: Monte Carlo
     Number_of_graphs = 20             # Number of different erdos graphs
     Number_of_draw = 10   # Number of different random seeds for random seeding
@@ -144,13 +144,14 @@ def Simulate_SIR(c=0.3,number_of_seeds=5):
             CascadeEig.append(ans)
     
     
-    out = {'Rand_m':np.round(np.mean(CascadeRand),2), 'Rand_s':np.round(np.std(CascadeRand),2),
-           'Deg_m' :np.round(np.mean(CascadeDeg),2),   'Deg_s':np.round(np.std(CascadeDeg),2),
-           'Eig_m' :np.round(np.mean(CascadeEig),2),   'Eig_s':np.round(np.std(CascadeEig),2)}
+    out = {'C':[c],'Seed':[number_of_seeds],
+           'Rand_m':[np.round(np.mean(CascadeRand),2)], 'Rand_s':[np.round(np.std(CascadeRand),2)],
+           'Deg_m' :[np.round(np.mean(CascadeDeg),2)],   'Deg_s':[np.round(np.std(CascadeDeg),2)],
+           'Eig_m' :[np.round(np.mean(CascadeEig),2)],   'Eig_s':[np.round(np.std(CascadeEig),2)]}
     
-    return out
+    return pd.DataFrame(out)
         
         
-b = Simulate_SIR(c=0.3,number_of_seeds=20)           
+b = Simulate_SIR(c=0.3,number_of_seeds=10)           
 
 
